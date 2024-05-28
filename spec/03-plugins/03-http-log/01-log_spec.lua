@@ -561,12 +561,12 @@ for _, strategy in helpers.each_strategy() do
       assert.res_status(200, res)
 
       local entries = get_log("http_host_header", 1)
-      local host_header
-      if helpers.mock_upstream_port == 80 then
-        host_header = helpers.mock_upstream_host
-      else
-        host_header = helpers.mock_upstream_host .. ":" .. helpers.mock_upstream_port
-      end
+      local host_header = helpers.mock_upstream_host
+      -- if helpers.mock_upstream_port == 80 then
+      --   host_header = helpers.mock_upstream_host
+      -- else
+      --   host_header = helpers.mock_upstream_host .. ":" .. helpers.mock_upstream_port
+      -- end
       assert.same(entries[1].log_req_headers['host'] or "", host_header)
     end)
 
