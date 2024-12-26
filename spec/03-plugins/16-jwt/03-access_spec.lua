@@ -470,6 +470,26 @@ for _, strategy in helpers.each_strategy() do
         assert.same({ message = "Multiple tokens provided" }, body)
         assert.equal('Bearer error="invalid_token"', res.headers["WWW-Authenticate"])
       end)
+
+      it("accepts token parameter index in query args to exceed 100", function()
+        PAYLOAD.iss = jwt_secret.key
+        local jwt = jwt_encoder.encode(PAYLOAD, jwt_secret.secret)
+        local str_args, table_args = "", {}
+        for i = 1, 101 do
+          table.insert(table_args, "k" .. i .."=v" .. i)
+        end
+        str_args = table.concat(table_args, "&")
+        local res = assert(proxy_client:send {
+          method  = "GET",
+          path    = "/request?" .. str_args .. "&jwt=" .. jwt,
+          headers = {
+            ["Host"] = "jwt1.test",
+          }
+        })
+        local body = cjson.decode(assert.res_status(401, res))
+        assert.same({ message = "Multiple tokens provided" }, body)
+        assert.equal('Bearer error="invalid_token"', res.headers["WWW-Authenticate"])
+      end)
     end)
 
     describe("HS256", function()
