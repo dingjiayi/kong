@@ -11,6 +11,7 @@ local ipairs = ipairs
 local pairs = pairs
 local tostring = tostring
 local re_gmatch = ngx.re.gmatch
+local search_get_all = require("resty.ada.search").get_all
 
 
 local JwtHandler = {
@@ -27,19 +28,12 @@ local JwtHandler = {
 -- @return err
 local function retrieve_tokens(conf)
   local token_set = {}
-  local args = kong.request.get_query()
+  local query = kong.request.get_raw_query()
   for _, v in ipairs(conf.uri_param_names) do
-    local token = args[v] -- can be a table
-    if token then
-      if type(token) == "table" then
-        for _, t in ipairs(token) do
-          if t ~= "" then
-            token_set[t] = true
-          end
-        end
-
-      elseif token ~= "" then
-        token_set[token] = true
+    local token = search_get_all(query, v)
+    for _, t in ipairs(token) do
+      if t ~= "" then
+        token_set[t] = true
       end
     end
   end
